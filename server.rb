@@ -42,4 +42,4 @@ class Server
   end
 end
 
-Server.new( 3000, "localhost" )
+Server.new( 3333, "50.116.9.112" )
