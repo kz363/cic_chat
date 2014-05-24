@@ -22,6 +22,7 @@ class Server
         puts "#{nick_name} #{client}"
         @connections[:clients][nick_name] = client
         client.puts "Connection established, Thank you for joining! Happy chatting"
+        list_current_users( client )
         listen_user_messages( nick_name, client )
       end
     }
@@ -38,6 +39,14 @@ class Server
       end
     }
   end
+
+  def list_current_users( client )
+    client.puts "Users currently logged in:"
+    @connections[:clients].each_key do |name|
+      client.puts name
+    end
+  end
+
 end
 
 Server.new( 3333, "50.116.9.112" )
