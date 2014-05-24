@@ -9,7 +9,6 @@ class Client
     listen
     send
     logout
-    @logout.join
     @request.join
     @response.join
   end
@@ -34,20 +33,14 @@ class Client
   end
 
   def logout
-    @logout = Thread.new do
-      loop {
-        trap("INT") do
-          puts "\nDisconnecting."
-          @server.puts "quit"
-          @server.close
-          exit
-        end
-      }
+    trap("INT") do
+      puts "\nDisconnecting."
+      @server.puts "quit"
+      @server.close
+      exit
     end
   end
 end
-require 'pry'
-server = TCPSocket.open( "localhost", 3333 )
-# binding.pry
-Client.new( server )
 
+server = TCPSocket.open( "localhost", 3333 )
+Client.new( server )

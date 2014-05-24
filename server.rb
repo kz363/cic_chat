@@ -1,13 +1,13 @@
-#!/usr/bin/env ruby -w
 require "socket"
 require 'highline/import'
-require 'debugger'
+
 class Server
   def initialize( ip, port )
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @clients = Hash.new
     @connections[:clients] = @clients
+    trap_shutdown
     run
   end
 
@@ -37,11 +37,7 @@ class Server
       disconnect_client( username ) if msg == "quit"
       msg = "(#{Time.now.strftime "%H:%M:%S"})" + HighLine.color(" #{username.to_s}:", :bold) + " #{msg}"
       puts msg
-      @connections[:clients].each do |other_name, other_client|
-        unless other_name == username
-          other_client.puts msg
-        end
-      end
+      print_message_to_clients( msg )
     }
   end
 
@@ -72,6 +68,14 @@ class Server
   def print_message_to_clients( msg )
     @connections[:clients].each_value do |client|
       client.puts msg
+    end
+  end
+
+  def trap_shutdown
+    trap("INT") do
+      puts "\nClosing server."
+      @server.close
+      exit
     end
   end
 end
