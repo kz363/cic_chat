@@ -1,4 +1,5 @@
 require "socket"
+require 'highline/import'
 
 class Client
   def initialize( server )
@@ -7,10 +8,11 @@ class Client
     @response = nil
     listen
     send
+    logout
+    @logout.join
     @request.join
     @response.join
   end
-
 
   def listen
     @response = Thread.new do
@@ -30,7 +32,22 @@ class Client
       }
     end
   end
-end
 
+  def logout
+    @logout = Thread.new do
+      loop {
+        trap("INT") do
+          puts "\nDisconnecting."
+          @server.puts "quit"
+          @server.close
+          exit
+        end
+      }
+    end
+  end
+end
+require 'pry'
 server = TCPSocket.open( "localhost", 3333 )
+# binding.pry
 Client.new( server )
+

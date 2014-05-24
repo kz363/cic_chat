@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby -w
 require "socket"
+require 'highline/import'
+require 'debugger'
 class Server
-  def initialize( port, ip )
+  def initialize( ip, port )
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @clients = Hash.new
@@ -21,7 +23,7 @@ class Server
         end
         puts "#{nick_name} #{client}"
         @connections[:clients][nick_name] = client
-        client.puts "Connection established, Thank you for joining! Happy chatting\n\r"
+        client.puts "\e[H\e[2JYou've connected to cic_chat! Happy chatting.\n\r"
         print_user_login( nick_name )
         list_current_users( client )
         listen_user_messages( nick_name, client )
@@ -32,28 +34,46 @@ class Server
   def listen_user_messages( username, client )
     loop {
       msg = client.gets.chomp
-      puts "#{username.to_s}: #{msg}"
+      disconnect_client( username ) if msg == "quit"
+      msg = "(#{Time.now.strftime "%H:%M:%S"})" + HighLine.color(" #{username.to_s}:", :bold) + " #{msg}"
+      puts msg
       @connections[:clients].each do |other_name, other_client|
         unless other_name == username
-          other_client.puts "#{username.to_s}: #{msg}"
+          other_client.puts msg
         end
       end
     }
   end
 
   def list_current_users( client )
-    client.puts "Users currently logged in:"
+    client.puts "*" * 50 + "\nUsers currently logged in:"
     @connections[:clients].each_key do |name|
       client.puts name
     end
+    client.puts "*" * 50 + "\n"
   end
 
   def print_user_login( name )
+    puts ">>#{name} has logged in"
     @connections[:clients].each_value do |client|
-      client.puts "#{name} has logged in"
+      client.puts ">>#{name} has logged in"
     end
   end
 
+  def disconnect_client( name )
+    @connections[:clients][name.to_sym].close
+    msg = ">>#{name} has logged out"
+    puts msg
+    @connections[:clients].delete( name )
+    print_message_to_clients( msg )
+    Thread.kill self
+  end
+
+  def print_message_to_clients( msg )
+    @connections[:clients].each_value do |client|
+      client.puts msg
+    end
+  end
 end
 
-Server.new( 3333, "localhost" )
+Server.new( "localhost", 3333 )
