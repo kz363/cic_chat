@@ -22,6 +22,10 @@ class Server
         puts "#{nick_name} #{client}"
         @connections[:clients][nick_name] = client
         client.puts "Connection established, Thank you for joining! Happy chatting"
+        # client.puts "User has logged in"
+        @connection[:clients].each_value do |client|
+          client.puts "#{nick_name} has logged in"
+        end
         list_current_users( client )
         listen_user_messages( nick_name, client )
       end
@@ -46,6 +50,7 @@ class Server
       client.puts name
     end
   end
+
 
 end
 
