@@ -10,7 +10,7 @@ class Client
     @request.join
     @response.join
   end
-  
+
 
   def listen
     @response = Thread.new do
@@ -32,5 +32,5 @@ class Client
   end
 end
 
-server = TCPSocket.open( "50.116.9.112", 3333 )
+server = TCPSocket.open( "localhost", 3333 )
 Client.new( server )

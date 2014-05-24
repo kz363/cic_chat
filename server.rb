@@ -21,11 +21,8 @@ class Server
         end
         puts "#{nick_name} #{client}"
         @connections[:clients][nick_name] = client
-        client.puts "Connection established, Thank you for joining! Happy chatting"
-        # client.puts "User has logged in"
-        @connection[:clients].each_value do |client|
-          client.puts "#{nick_name} has logged in"
-        end
+        client.puts "Connection established, Thank you for joining! Happy chatting\n\r"
+        print_user_login( nick_name )
         list_current_users( client )
         listen_user_messages( nick_name, client )
       end
@@ -51,7 +48,12 @@ class Server
     end
   end
 
+  def print_user_login( name )
+    @connections[:clients].each_value do |client|
+      client.puts "#{name} has logged in"
+    end
+  end
 
 end
 
-Server.new( 3333, "50.116.9.112" )
+Server.new( 3333, "localhost" )
